@@ -4,6 +4,6 @@
 .httr-oauth
 .DS_Store
 .quarto
-old_scripts/*
-test_me/*
+old_scripts/
+test_me/
 *.qmd
