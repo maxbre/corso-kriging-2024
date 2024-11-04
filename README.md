@@ -1,3 +1,3 @@
 # Appunti di geostatistica
 
-Corso base Prof. Pirotti (UniPD)
+Corso base ARPAV tenuto dal Prof. Pirotti (UniPD) nel 2024.

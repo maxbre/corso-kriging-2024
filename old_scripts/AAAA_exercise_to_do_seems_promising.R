@@ -1,1 +1,0 @@
-# https://gis.stackexchange.com/questions/419758/export-kriging-plot-as-geotiff
