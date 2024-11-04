@@ -1,0 +1,258 @@
+---
+title: "Appunti di geostatistica"
+subtitle: "Che cos'è il kriging?<br>Una sintesi in 10 min di lettura."
+author: "Massimo Bressan, ARPAV UQA"
+date: "today"
+
+format: 
+  html:
+    self-contained: true
+    fig-width: 8
+    fig-height: 4
+    code-fold: false
+---
+
+# Nota alla lettura
+
+Questa breve nota è una semplificazione estrema dei termini spesso molto intricati di un problema statistico complesso e, quindi, come tutte le semplificazioni, "tradisce" alcuni aspetti molto rilevanti.
+
+L'obiettivo della nota è individuare il "percorso generale" che viene sotteso da una stima effettuata con tecniche di kriging individuando, per quanto possibile, la "direzione di marcia" e fissando i principali "caposaldo" su cui focalizzare l'attenzione per tutti gli eventuali successivi approfondimenti. 
+
+# Un caso studio simulato
+
+Immaginiamo un'isola dove sono stati campionati 15 punti per la misura della quota sul livello del mare (cerchi in blu nella figura seguente) con l'obiettivo di riprodurre un modello digitale del terreno (un modello molto semplificato!).
+
+Successivamente, per qualche motivo, ci accorgiamo che per completare il lavoro abbiamo la necessità di disporre di una misura aggiuntiva della quota e, quindi,  abbiamo individuato un nuovo punto di campionamento sull'isola (il triangolo segnato in rosso nella figura seguente). 
+
+Immaginiamo poi che, per qualche altro motivo non ben precisato, non sia più possibile tornare sull'isola (...è improvvisamente scomparsa!).
+
+
+### Il problema: è possibile stimare la quota del nuovo punto?
+
+Rappresentiamo schematicamente (con poche righe di codice R) la situazione sopra descritta.
+
+```{r}
+#| message: false
+#| warning: false
+#| echo: true
+
+suppressMessages(library(sf))
+
+nc <- st_read(system.file("shape/nc.shp", package="sf"), quiet=TRUE)
+nc <- nc[1,]
+set.seed(31234)
+p1 <- st_sample(nc, 15)
+p2 <- st_sample(nc, 1)
+plot(st_geometry(nc))
+plot(p1, add = TRUE, col="blue")
+plot(p2, add = TRUE, pch = 2, col ="red")
+text(st_coordinates(p2)+0.02, labels = "new", cex=0.6, col="red")
+
+
+```
+
+### Quali sono le informazioni disponibili per risolvere il problema?
+
+Per ognuno dei 15 punti noti sull'isola $(x_i,y_i)$ sono disponibili le seguenti informazioni:
+
+- $x_i$: la sua collocazione geografica (es.: lon, lat);
+- $y_i$: la sua quota sul livello del mare (m slm);
+
+Immaginiamo di voler ricostruire la quota non nota $y_{new}$ del nuovo punto (il triangolo in rosso) sulla base delle informazioni che ricaviamo dai 5 punti più vicini $y_1$, $y_2$, $y_3$, $y_4$, $y_5$. Il numero 5 è qui ovviamente del tutto arbitrario. E in modo del tutto analogo per i 15 punti noti.
+
+In altri termini, osserviamo la quota dei punti noti più vicini $y_1, ...,y_5$ e cerchiamo di derivare una regola che in qualche modo ci permetta di stimare la quota del nuovo punto, non noto $y_{new}$.
+
+Semplificando all'estremo e riferendoci al nostro esempio, la tecnica geostatistica **kriging** afferma che:
+
+**la quota del punto non noto $y_{new}$ si può stimare tramite una *"combinazione lineare"* delle quote dei 5 punti ad esso più vicini $y_1, ...,y_5$.**
+
+E raffinando ulteriormente questo approccio, possiamo pensare di attribuire dei **"pesi differenti"** ai vari punti noti ($y_1, ...,y_5$) in funzione di qualche ulteriore "attributo specifico".
+
+La **distanza reciproca** tra i punti sembra essere un ottimo "candidato" per questo scopo! Di fatto la distanza è l'unico "appiglio" di cui disponiamo per cercare di raggiungere la "vetta" (quota) del punto non noto.
+
+A questo punto sorge la domanda: **è possibile dal punto di vista matematico formalizzare questo concetto in modo sufficientemente robusto?**
+
+E qui entra in nostro soccorso la tecnica di **kriging**.
+
+# Il modello concettuale
+
+Esprimendo in forma matriciale:
+
+$$y_{new} = w^Ty + E_{new}$$
+dove:
+
+$E_{new}$ = errore della stima
+
+Riscritto in forma estesa:
+
+$$y_{new} = w_1~y_1~ +~w_2~y_2~+~...~+~w_5~y_5~+~E_{new}$$
+Come si "legge" questa formula:
+
+**la quota del punto non noto $y_{new}$ è uguale ad una combinazione lineare delle quote dei punti noti $y_1, ...,y_5$ a ciascuna delle quali viene attribuita un'importanza relativa in funzione dei rispettivi "pesi" $w_1, ...,w_5$**.
+
+Ma perchè è necessaria l'attribuzione di questi pesi? 
+
+Beh... fondamentalmente perchè voglio attribuire un'importanza differente alle varie quote dei punti noti in funzione di quanto sono vicini al punto non noto. Si ritorna cioè al concetto di una sostanziale maggiore similarità tra i vicini più prossimi. 
+
+E' un approccio del tutto ragionevole: si basa sul principio intuitivo che il prossimo più vicino è più simile rispetto a quello che sta più lontano.
+
+*"Everything is related to everything else, but near things are more related than distant things", The First Law of Geography, according to Waldo Tobler.*
+
+Ora, in questo semplice modello, l'unica informazione ancora mancante è rappresentata proprio dai pesi $w_1, ...,w_5$  che devono essere attribuiti alle quote dei punti noti. In altri termini, se riesco a trovare un modo per definire i pesi delle quote dei punti noti "il gioco è fatto" e posso in qualche modo stimare la quota del punto non noto.
+
+Ma come posso "chiudere" questo approccio con le informazioni di cui dispongo?
+
+L'unica informazione che non ho ancora utilizzato, ed è la sola ancora effettivamente ricavabile dal nostro esempio, è la **distanza relativa** tra i punti.
+*Dal punto di vista intuitivo, in una primissima e del tutto cruda approssimazione, posso pensare di attribuire un peso maggiore alle quote dei punti che hanno una distanza minore rispetto a quelli dei punti che sono più lontani*.
+
+Ed ecco, ancora una volta la domanda: come posso formalizzare tutto questo approccio concettuale?
+
+E qui ora entra in gioco il **"variogramma"**.
+
+
+# Il variogramma (...what the heck is that?)
+
+Consideriamo attentamente la seguente funzione $\gamma()$:
+
+$$\gamma(x_i,x_j) = \frac{1}{2} ~(y_i - y_j)^2 $$
+Riferendoci ancora una volta al nostro esempio: $x_i,x_j$ rappresentano la collocazione geografica delle coppie di punti che sono considerati dalla funzione $\gamma()$, mentre $y_i, y_j$ sono le rispettive quote.
+
+Cioè, questo approccio formale ci racconta che se considero due punti qualsiasi $x_i,x_j$ allora la funzione $\gamma()$ è uguale a 1/2 della differenza tra le quote (al quadrato). *Il variogramma è una funzione che mette in relazione la distanza dei punti con la loro rispettiva quota secondo un modello concettuale predefinito che postula una similarità di vicinaggio.*
+
+Ora, ammettiamo che $\gamma()$ sia una funzione sufficientemente robusta per descrivere il fenomeno in esame: cosa possiamo aspettarci da questa funzione?
+
+Molto semplicemente, se si accettano i presupposti di fondazione del modello concettuale, si intuisce subito che più sono vicini i due punti considerati $x_i,x_j$ tanto più piccola sarà la differenza tra le quote dei punti $y_i, y_j$. 
+
+Ma questo perchè? 
+
+Perchè, ancora una volta, si ritorna al concetto di similarità dovuta al "vicinaggio" (neighborhood). E' infatti del tutto **probabile** (nota bene stiamo trattando di geo*statistica*) che due punti tra loro molto vicini abbiano delle quote altimetriche tra loro molto simili (o abbastanza simili). E viceversa, due punti tra loro molto distanti nello spazio avranno maggiore probabilità di avere delle quote altimetriche differenti.
+
+La funzione $\gamma()$, il variogramma, ci dice che tanto più sono vicini dal punto di vista geografico i due punti considerati $x_i,x_j$ tanto più piccola sarà la differenza tra le loro rispettive quote $y_i, y_j$. E viceversa.
+
+Ecco quindi che, partendo da questo semplice ragionamento, cominciamo ad intuire quale possibile andamento tipico potrà avere la funzione $\gamma()$.
+
+Utilizzando questa prima intuizione, come potrà essere rappresentato  il grafico della funzione $\gamma()$, cioè il variogramma?
+
+Osserviamo attentamente il grafico seguente.
+
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+#| fig.align: center
+#| out.width: 60%
+
+knitr::include_graphics("./img/schematic_variogram.png")
+
+  
+```
+
+Si nota subito che il grafico del variogramma cresce al crescere della distanza $h$ (lag distance) tra i punti considerati, fino ad un certo punto in cui raggiunge un *plateau*. 
+Ma perchè, a quel certo punto, ci aspettiamo che la funzione $\gamma()$ raggiunga un *plateau*? E' corretta questa assunzione?
+
+Molto semplicemente, ancora una volta, ragioniamo con il solito criterio di prossimità (o distanza): ad esempio,se due punti sono distanti 100 km mi aspetto che molto probabilmente le loro quote differiranno molto tra loro. Ma se distano tra loro 200 o 300 km non mi aspetto che differiscano ancora di più, sono abbastanza confidente (è probabile) che dopo una certa prefissata distanza le differenze tendano a "livellarsi": cioè, in altri termini, sono comunque due punti differenti tra loro ma non riesco a notare un incremento (statisticamente) significativo nella loro differenza.
+
+Nel grafico ci sono poi da osservare altri "punti notevoli" che sono tipici della terminologia geostatistica.
+
+**Nugget**
+
+Perchè quello scarto iniziale nella funzione $\gamma()$? Il grafico della funzione non dovrebbe correttamente iniziare da zero? Cioè la differenza tra le quote riferita ad una distanza tra i punti pari a zero non dovrebbe essere pari a zero?
+La risposta è sì, almeno dal punto di vista strettamente teorico. La linea continua della funzione $\gamma()$ rappresenta il variogramma adattato sui dati che sono rappresentati dalla nuvola di punti che si posizionano attorno alla linea. Il variogramma rappresenta il "best fit" dei punti. Maggiore è il valore del "nugget" maggiore è lo scarto rispetto al "modello teorico" e maggiore è il "rumore di fondo" presente nel dataset. Per tutte le coppie di punti che sono tra loro posizionati ad una distanza pari a zero dovremmo verificare che la differenza tra le quote è zero. Più questa differenza si allontana dal "valore teorico" (zero) maggiore è l'errore o lo scostamento dalla situazione ideale. Il nugget individua il cosidetto  "effetto pepita". L'effetto nugget è semplicemente la somma degli errori di misura e/o della variazione su microscala (che non viene colta dal modello). In termini matematici rappresenta l'offset (errore iniziale) della curva di fitting.
+
+**Sill**
+
+Il *plateau* a cui ci riferivamo in precedenza tappresenta il "tetto" (davanzale) del grafico.
+Il "sill" rappresenta dal punto di vista statistico la varianza del dataset (cioè la misura che fornisce la variabilità totale del dataset).
+
+**Range**
+
+Il punto in cui il "sill" interseca la linea della funzione $\gamma()$ individua il "range" che rappresenta il valore di h (corrisponde alla distanza tra i punti) in cui il variogramma "tocca" il "sill". 
+
+Ora, ancora una volta, perchè tutta questa formalizzazione?
+
+Detto in modo estremamente "semplice", e senza entra negli aspetti matematici più profondi, significa quanto segue.
+
+Ritornando al nostro esempio, risolvere il modello di kriging significa risolvere il calcolo dei pesi dei punti noti ($w_1, ...,w_5$).
+
+E questo significa, in termini matriciali, risolvere la seguente equazione:
+
+$$Aw=b$$
+
+dove:
+
+$A = (x_i,x_j)$ matrice della posizione geografica dei punti considerati
+
+$w$ = vettore dei pesi $w_1, ...,w_5$  da attribuire ai vari punti
+
+$b = \gamma(x_{new}, x_i)$ il vettore dato dal variogramma
+
+
+Risolvere l'equazione matriciale significa trovare i pesi $w_1, ...,w_5$ tramite l'inversione della matrice $A$:
+
+$$\hat w~=~A^{-1}~b$$
+dove:
+
+$\hat w$ sono i pesi stimati dal modello (best fit).
+
+*La matrice $A$ è nota (collocazione geografica dei punti noti) ed anche il vettore $b$ è noto tramite il variogramma cioè la funzione $\gamma()$ che lega la quota del punto non noto con le quote dei punti noti in funzione della distanza* (vedi sopra).
+
+L'inversione matriciale di cui stiamo parlando è un processo matematico affatto banale e presuppone tecniche di calcolo sofisticate (su cui non si può entrare in questa brevissima nota).
+
+Una volta calcolati i pesi con l'operazione di cui sopra, questi vengono inseriti nel modello di kriging (linear best fit) per ottenere una stima della quota del nuovo punto $x_{new}$ sull'isola.
+
+Concludendo, il variogramma è lo strumento fondamentale per individuare i pesi $w_1, ...,w_5$  e successivamente "fittare" (adattare) il modello di kriging ai dati sperimentali.
+
+Tutto questo in una prima brutale approssimazione. 
+
+In realtà la **è la matrice di covarianza "ricavata" dal variogramma che viene utilizzata per il calcolo dei pesi** (e in un modo leggermente differente a seconda del tipo di kriging). 
+
+Non si entra nel dettaglio di come è possibile ricavare la matrice di covarianza dal variogramma. Basti qui ricordare che esiste una relazione tra semivariogramma e covarianza:
+
+$$\gamma(x_i,x_j) = Sill - C(x_i- x_j)$$ 
+
+Semivariogramma e covarianza non possono essere funzioni qualsiasi. Si verificano infatti delle situazioni per cui dal variogramma non è possibile derivare la covarianza. Ai fini della previsione del kriging per ottenere errori standard *non negativi* solo alcune funzioni possono essere utilizzate: ecco perchè la necessità di individuare un *modello* di variogramma predefinito. Infatti, quando la funzione del variogramma viene "limitata" ("bounded to some constraints") risulta equivalente alla funzione di covarianza.
+
+*Il semivariogramma è legato alla funzione di covarianza che rappresenta una misura della forza statistica della similarità tra i punti in relazione alla loro distanza.*
+
+In sintesi, l'algoritmo di kriging restituisce i **pesi ottimali** come soluzione di un sistema di equazioni lineari che coinvolgono la funzione di covarianza. Al fine di portare a termine questa procedura statistica è quindi necessario conoscere la sottostante funzione di covarianza. E in questo processo il fondamentale passaggio di tipo preliminare è dato dalla  possibilità di riconoscere un adeguato valore del *sill* nel variogramma sperimentale.
+
+Rimane aperta la domanda sul perchè trattare proprio la covarianza e non direttamente il variogramma. Non si entra qui su questo dettaglio tecnico che attiene alle proprietà specifiche della covarianza ed alla possibilità di essere derivata e trattata in modo appropriato e robusto dal punto di vista statistico (cosa che non è possibile in prima istanza per il "semplice" variogramma).
+
+Rimane ora un'ultima domanda (in realtà ce ne sono molte altre sulle quali sorvoliamo, almeno per ora): quando è possibile applicare il modello concettuale di kriging? E In quali condizioni? E quali sono i vincoli?
+
+# Assunzioni del modello
+
+Due assunzioni fondamentali:
+
+- **stazionarietà**:
+
+  ritornando all'esempio, se osservo qualsiasi punto della mia isola dovrei ottenere sempre una "identica" descrizione dello stesso attributo: "la quota"; in particolare, lo stesso valore di tendenza centrale della quota (la media) e la stessa "volatilità" dei valori del dataset (deviazione standard, varianza); cioè, in un qualsiasi punto dell'isola la quota non dovrebbe mai cambiare in modo così rapido e drastico rispetto a tutti gli altri punti dell'isola;
+
+- **variogramma costante (isotropia)**: 
+
+  il variogramma è fondamentalmente la descrizione della relazione che esiste tra la distanza di due punti e la differenza nella quota altimetrica; indipendentemente da quale punto dell'isola stiamo esaminando il variogramma dovrebbe avere una forma pressochè costante (e questo è abbastanza implicito nel procedimento, considerato che il variogramma è lo strumento con cui vengono calcolati i pesi da applicare nel sistema di regressione lineare); cioè, il variogramma, ossia la variazione della quota altimetrica tra i punti in relazione alla variazione della loro distanza reciproca, dovrebbe essere approssimativamente costante sull'intera isola (perchè il modello concettuale regga in modo sufficientemente robusto).
+
+Se queste due assunzioni iniziali sono rispettate allora siamo nella condizione di poter utilizzare in modo statisticamente robusto e teoricamente fondato il modello di kriging.
+
+Se queste due assunzioni non sono soddisfatte in prima battuta allora possono essere applicate alcune trasformazioni dei dati, oppure alcune tecniche di "rilassamento" delle condizioni iniziali.
+
+# Pro & Cons
+
+### Pro
+
+La tecnica geostatistica di kriging fornisce anche una valutazione dell'incertezza della stima, cioè la varianza associata a ciascun punto della stima (aspetto non trattato in questa nota).
+
+### Cons
+
+Intensità e richiesta computazionale. Il calcolo dei pesi è strettamente specifico per i punti considerati. Ritornando al nostro esempio la determinazione dei pesi, cioè in sintesi quel processo di "inversione matriciale", regge esclusivamente per i 5 punti considerati. Nel caso di centinaia o migliaia di punti potrebbe presentarsi un problema di intensità computazionale o di mancata "convergenza" del calcolo.
+
+
+# Credits (inspired by...)
+
+Take a look at this guy, really great!
+
+[The Kriging Model: Data Science Concepts
+](https://www.youtube.com/watch?v=J-IB4_QL7Oc){.external target="_blank"}
+
+
+

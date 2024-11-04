@@ -1,0 +1,1 @@
+The points represent the measured data points (observed) and the curve represents the model function used (empirical). Range stands for the range sought, sill for the plateau value reached at maximum range, nugget for the nugget effect.

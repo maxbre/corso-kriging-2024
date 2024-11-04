@@ -1,0 +1,148 @@
+---
+title: "Appunti corso kriging gstat 2024"
+author: "mb"
+date: "today"
+format: 
+  html:
+    fig-width: 8
+    fig-height: 4
+    code-fold: false
+---
+
+# Dataset misure
+
+A partire dai dati grezzi:
+
+- raster DEM RV
+- raster temperatura RV
+
+Applico alcune operazioni preliminari per creare un dataset "pulito" su cui svolgere gli esercizi:
+
+- importo raster (temperatura, DEM)
+- campiono 1000 punti su raster temperatura
+- estraggo quote (altitudine slm) in corrispondenza dei punti campionati
+- creo dataframe con coordinate (xy),temperatura e quota
+
+```{r}
+
+library(terra)
+
+# read raster temperature RV
+temp_r <- rast("./data_raw/VenetoCorrectedMODIS_LST_Avg2017.tif")
+
+# read raster elevation (dem) RV
+dem_r <- rast("./data_raw/VenetoDEM.tif")
+
+## temp sample 1000 points from raster temp RV
+temp_s <- spatSample(temp_r,
+                            method="random",
+                            size=1000,
+                            na.rm=T,
+                            as.points=T)
+# rename variable
+names(temp_s) <- "temp"
+
+# extract elev sample from raster dem RV through temp points
+elev_s <- extract(dem_r, temp_s, ID= FALSE)
+
+# rename variable
+names(elev_s) <- c("elev_m")
+
+# extract coordinates
+xy <- geom(temp_s)[,3:4]
+
+# transform to each object to a df
+temp <- as.data.frame(temp_s)
+elev <- as.data.frame(elev_s)
+
+#compose final df to work with by leaving out na
+mydf <- na.omit(data.frame(xy, temp, elev))
+
+```
+
+# Grid per interpolazione
+
+Preparazione della base dati (grid) su cui effettuare l'interpolazione ( previsione sui punti non noti - non coperti da misure).
+
+```{r}
+
+# read gpkg as vector 
+RV_v <- vect("./data_raw/veneto.gpkg")
+
+# also possible this approach
+#library(sf)
+#RV_sf <- read_sf("./data_raw/veneto.gpkg")
+
+# transform vector to raster
+# data are in lat long!
+RV_r <- rast(RV_v, resolution = 0.01)
+
+# add some arbitrary values to the raster
+values(RV_r) <- -999
+
+# mask the raster to the shape of region
+RV_r <- mask(RV_r, RV_v)
+
+# plot 
+plot(RV_r)
+
+```
+
+
+# Interpolazione con metodi deterministici
+
+```{r}
+
+#interpNear(RV_v, temp_s, field="temp", radius=1)
+
+```
+
+
+# Interpolazione con metodi statistici - Kriging
+
+
+## Analisi del variogramma
+
+```{r}
+
+library(sp)
+library(gstat)
+
+coordinates(mydf) <- ~x+y
+proj4string(mydf) <- CRS("epsg:4326")
+
+# lagged scatterplot for first 500 rows
+hscat(temp~1, data= mydf[1:500,], breaks=c(0, 0.05, 0.1, 0.5, 1, 2, 3))
+
+############# case 1 ----
+# variogram cloud for temp, selection of first 500 rows
+plot(variogram(temp~1, data= mydf[1:500,], cloud=TRUE))
+
+# experimental variogram for temp, with number of obs
+p1 <- plot(variogram(temp~1, data= mydf), plot.numbers=TRUE)
+
+# this is to just to update the size of labels
+# I know it's a strange way, this is just a workaround....
+# because the size of labels is actually hardcoded in the function
+# but do not focus too much on this issue, it's not important now...
+opts <- lattice::trellis.par.get()
+opts$add.text$cex <- 0.6
+update(p1, par.settings = opts)
+
+############# case 2 ----
+# experimental variogram for temp and covariate elev, with numbers of obs
+p2 <- plot(variogram(temp~elev_m, data= mydf), plot.numbers=TRUE)
+
+# same as before for about the labels
+update(p2, par.settings = opts)
+
+############# case 3 ----
+# experimental variogram for temp and covariates x+y, with numbers of obs
+p3 <- plot(variogram(temp~x+y, data= mydf), plot.numbers=TRUE)
+
+# same as before for about the labels
+update(p3, par.settings = opts)
+
+```
+
+
