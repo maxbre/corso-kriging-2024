@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Massimo Bressan, ARPAV UQA">
-<meta name="dcterms.date" content="2024-11-04">
+<meta name="dcterms.date" content="2024-11-05">
 
 <title>Appunti di geostatistica</title>
 <style>
@@ -3243,7 +3243,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">November 4, 2024</p>
+      <p class="date">November 5, 2024</p>
     </div>
   </div>
   
@@ -3372,8 +3372,8 @@ window.Quarto = {
 <p>Una volta calcolati i pesi con l’operazione di cui sopra, questi vengono inseriti nel modello di kriging (linear best fit) per ottenere una stima della quota del nuovo punto <span class="math inline">\(x_{new}\)</span> sull’isola.</p>
 <p>Concludendo, il variogramma è lo strumento fondamentale per individuare i pesi <span class="math inline">\(w_1, ...,w_5\)</span> e successivamente “fittare” (adattare) il modello di kriging ai dati sperimentali.</p>
 <p>Tutto questo in una prima brutale approssimazione.</p>
-<p>In realtà la <strong>è la matrice di covarianza “ricavata” dal variogramma che viene utilizzata per il calcolo dei pesi</strong> (e in un modo leggermente differente a seconda del tipo di kriging).</p>
-<p>Non si entra nel dettaglio di come è possibile ricavare la matrice di covarianza dal variogramma. Basti qui ricordare che esiste una relazione tra semivariogramma e covarianza:</p>
+<p>In realtà la <strong>è la matrice di covarianza che viene utilizzata per il calcolo dei pesi</strong> (e in un modo leggermente differente a seconda del tipo di kriging). Non si entra qui nel dettaglio di come è possibile “ricavare” la matrice di covarianza dal variogramma (anche perchè il processo è esattamente il contrario: il variogramma - non quello osservato - sperimentale - ma quello di fitting - utilizzato per il calcolo dei pesi - viene dedotto dalla funzione di covarianza).</p>
+<p>Basti qui ricordare che esiste una relazione tra semivariogramma e covarianza:</p>
 <p><span class="math display">\[\gamma(x_i,x_j) = Sill - C(x_i- x_j)\]</span></p>
 <p>Semivariogramma e covarianza non possono essere funzioni qualsiasi. Si verificano infatti delle situazioni per cui dal variogramma non è possibile derivare la covarianza. Ai fini della previsione del kriging per ottenere errori standard <em>non negativi</em> solo alcune funzioni possono essere utilizzate: ecco perchè la necessità di individuare un <em>modello</em> di variogramma predefinito. Infatti, quando la funzione del variogramma viene “limitata” (“bounded to some constraints”) risulta equivalente alla funzione di covarianza.</p>
 <p><em>Il semivariogramma è legato alla funzione di covarianza che rappresenta una misura della forza statistica della similarità tra i punti in relazione alla loro distanza.</em></p>

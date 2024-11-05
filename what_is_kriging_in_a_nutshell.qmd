@@ -204,9 +204,10 @@ Concludendo, il variogramma è lo strumento fondamentale per individuare i pesi 
 
 Tutto questo in una prima brutale approssimazione. 
 
-In realtà la **è la matrice di covarianza "ricavata" dal variogramma che viene utilizzata per il calcolo dei pesi** (e in un modo leggermente differente a seconda del tipo di kriging). 
+In realtà la **è la matrice di covarianza che viene utilizzata per il calcolo dei pesi** (e in un modo leggermente differente a seconda del tipo di kriging).
+Non si entra qui nel dettaglio di come è possibile "ricavare" la matrice di covarianza dal variogramma (anche perchè il processo è esattamente il contrario: il variogramma - non quello osservato - sperimentale - ma quello di fitting - utilizzato per il calcolo dei pesi - viene dedotto dalla funzione di covarianza). 
 
-Non si entra nel dettaglio di come è possibile ricavare la matrice di covarianza dal variogramma. Basti qui ricordare che esiste una relazione tra semivariogramma e covarianza:
+Basti qui ricordare che esiste una relazione tra semivariogramma e covarianza:
 
 $$\gamma(x_i,x_j) = Sill - C(x_i- x_j)$$ 
 
