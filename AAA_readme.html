@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Massimo Bressan, ARPAV UQA">
-<meta name="dcterms.date" content="2024-11-04">
+<meta name="dcterms.date" content="2024-11-08">
 
 <title>Appunti di geostatistica</title>
 <style>
@@ -3070,7 +3070,7 @@ vertical-align: -.125em;
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">November 4, 2024</p>
+      <p class="date">November 8, 2024</p>
     </div>
   </div>
   
@@ -3084,22 +3084,22 @@ vertical-align: -.125em;
 
 <section id="leggimi" class="level1">
 <h1>Leggimi</h1>
-<p>L’obiettivo degli appunti è ricapitolare i passaggi fondamentali di calcolo in R relativi all’esercitazione pratica sui metodi di interpolazione di tipo deterministico e geostatistico svolti nell’ambito del corso di formazione ARPAV tenuto dal Prof. Pirotti (UniPD) tenuto nel 2024 (per 16 ore complessive).</p>
+<p>L’obiettivo degli appunti è ricapitolare i passaggi fondamentali di calcolo in R relativi all’esercitazione pratica sui metodi di interpolazione di tipo deterministico e geostatistico, svolti nel corso di formazione ARPAV tenuto dal Prof. Pirotti (UniPD) nel 2024 (per 16 ore complessive).</p>
 <p>Strategia generale di analisi dei dati:</p>
 <ul>
 <li><p>creo un “dataset incompleto” (punti) relativi a temperatura e quota altimetrica a partire dal “dataset completo” (raster) della Regione Veneto;</p></li>
 <li><p>utilizzo metodi alternativi di interpolazione, sia di tipo deterministico che geostatistico, per ricreare una stima il più possibile attendibile del “dataset completo”;</p></li>
-<li><p>verifico i risultati di interpolazione sui punti “non noti” rispetto ai corrispondenti valori del “dataset completo”.</p></li>
+<li><p>verifico i risultati di interpolazione sui punti “non noti”.</p></li>
 </ul>
 <p>Nota bene:</p>
-<p>Per tutte le spiegazioni di carattere teorico ed applicativo si rimanda al <a href="https://github.com/fpirotti/ARPA2024_corsoBase" class="external" target="_blank">materiale didattico</a> reso disponibile dal Prof. Pirotti.</p>
-<p>L’obiettivo del presente esercizio è ripercorrere a futura memoria, nel modo più sintetico possibile, i passaggi di calcolo in R, senza introdurre alcun tipo di valutazione critica e/o ulteriore discussione sia rispetto ai metodi che ai risultati ottenuti.</p>
-<p>L’unica variazione rispetto agli scripts originali del Prof. Pirotti è rappresentata dall’applicazione di metodi leggermente differenti (funzioni ed argomenti) per il kriging che conducono comunque a risultati finali del tutto sovrapponibili.</p>
+<p>Per tutte le spiegazioni di carattere teorico ed applicativo si rimanda al <a href="https://github.com/fpirotti/ARPA2024_corsoBase" class="external" target="_blank">materiale didattico</a> reso disponibile dal Prof. Pirotti (UniPd).</p>
+<p>L’obiettivo dell’esercizio è ripercorrere a futura memoria e nel modo più sintetico possibile, i vari passaggi di calcolo in R, senza introdurre alcun tipo di valutazione critica e/o ulteriore discussione, sia rispetto ai metodi sia rispetto ai risultati ottenuti.</p>
+<p>L’unica variazione rispetto agli scripts originali del Prof. Pirotti (UniPD) è rappresentata dall’applicazione di metodi leggermente differenti per il kriging (funzioni ed argomenti dal pacchetto ‘gstat’) che portano comunque a risultati finali del tutto sovrapponibili.</p>
 </section>
 <section id="cfr.-file-what_is_kriging_in_a_nutshell.html" class="level1">
 <h1><em>cfr. file:</em><br> what_is_kriging_in_a_nutshell.html</h1>
-<p>Contiene una brevissima nota (10 min di lettura) che tratta le principali caratteristiche tecniche dell’interpolazione spaziale tramite kriging.</p>
-<p>In particolare, viene evidenziato il significato e l’impiego del “variogramma” per il calcolo dei pesi relativi al sistema lineare di kriging.</p>
+<p>Brevissima nota (10 min di lettura) che sintetizza le principali caratteristiche tecniche dell’interpolazione spaziale tramite kriging.</p>
+<p>In particolare, viene evidenziato il significato e l’impiego del “variogramma” finalizzato al calcolo dei pesi relativi al sistema lineare di kriging.</p>
 </section>
 <section id="cfr.-file-00_my_recap_data_cleaning_and_munging.r" class="level1">
 <h1><em>cfr. file:</em><br> 00_my_recap_data_cleaning_and_munging.R</h1>
@@ -3108,39 +3108,39 @@ vertical-align: -.125em;
 <li>raster DEM RV</li>
 <li>raster temperatura RV</li>
 </ul>
-<p>Applicazione di alcune operazioni preliminari per creare un dataset “pulito” su cui svolgere gli esercizi:</p>
+<p>applicazione di alcune operazioni preliminari per definire un dataset “pulito” su cui svolgere gli esercizi, in particolare:</p>
 <ul>
-<li>importo raster (temperatura, DEM)</li>
-<li>campiono 1000 punti su raster temperatura</li>
-<li>estraggo quote (altitudine slm) in corrispondenza dei punti campionati</li>
-<li>creo dataframe con coordinate (xy), temperatura e quota</li>
+<li>importazione raster (temperatura, DEM);</li>
+<li>campionamento di 1000 punti su raster temperatura;</li>
+<li>estrazione delle quote altimetriche in corrispondenza dei punti campionati;</li>
+<li>creazione dataframe con coordinate (xy), temperatura e quota.</li>
 </ul>
 </section>
 <section id="cfr.-file-01_my_recap_interpolation_deterministic_methods.r" class="level1">
 <h1><em>cfr. file:</em><br> 01_my_recap_interpolation_deterministic_methods.R</h1>
 <p>Applicazione dei metodi di interpolazione di tipo deterministico:</p>
 <ul>
-<li>nearest neighbour</li>
-<li>nearest neighbour with linear interpolation</li>
-<li>idw: inverse distance weighted power 1</li>
-<li>idw: inverse distance weighted power 2</li>
+<li>nearest neighbour;</li>
+<li>nearest neighbour with linear interpolation;</li>
+<li>idw: inverse distance weighted power 1;</li>
+<li>idw: inverse distance weighted power 2;</li>
 </ul>
-<p>e verifica finale dell’accuratezza finale di stima.</p>
+<p>e verifica finale dell’accuratezza di stima.</p>
 </section>
 <section id="cfr.-file-02_my_recap_interpolation_geostatistics_methods_ok_uk_ked_ck.r" class="level1">
 <h1><em>cfr. file:</em><br> 02_my_recap_interpolation_geostatistics_methods_ok_uk_ked_ck.R</h1>
 <p>Applicazione dei metodi di interpolazione di tipo geostatistico:</p>
 <ul>
-<li>ordinary kriging</li>
-<li>universal kriging</li>
-<li>kriging with external drift</li>
-<li>co-kriging</li>
+<li>ordinary kriging;</li>
+<li>universal kriging;</li>
+<li>kriging with external drift;</li>
+<li>co-kriging;</li>
 </ul>
-<p>e verifica finale dell’accuratezza finale di stima.</p>
+<p>e verifica finale dell’accuratezza di stima.</p>
 </section>
 <section id="conclusioni" class="level1">
 <h1>Conclusioni</h1>
-<p>La valutazione critica dei risultati viene lasciata come esercizio individuale di approfondimento.</p>
+<p>La valutazione critica dei risultati e dei metodi di analisi viene lasciata come esercizio individuale di approfondimento.</p>
 </section>
 
 </main>

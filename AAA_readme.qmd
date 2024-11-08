@@ -14,7 +14,7 @@ format:
 
 # Leggimi
 
-L'obiettivo degli appunti è ricapitolare i passaggi fondamentali di calcolo in R relativi all'esercitazione pratica sui metodi di interpolazione di tipo deterministico e geostatistico svolti nell'ambito del corso di formazione ARPAV tenuto dal Prof. Pirotti (UniPD) tenuto nel 2024 (per 16 ore complessive).
+L'obiettivo degli appunti è ricapitolare i passaggi fondamentali di calcolo in R relativi all'esercitazione pratica sui metodi di interpolazione di tipo deterministico e geostatistico, svolti nel corso di formazione ARPAV tenuto dal Prof. Pirotti (UniPD) nel 2024 (per 16 ore complessive).
 
 Strategia generale di analisi dei dati:
 
@@ -22,21 +22,21 @@ Strategia generale di analisi dei dati:
 
 - utilizzo metodi alternativi di interpolazione, sia di tipo deterministico che geostatistico, per ricreare una stima il più possibile attendibile del "dataset completo";
 
-- verifico i risultati di interpolazione sui punti "non noti" rispetto ai corrispondenti valori del "dataset completo".
+- verifico i risultati di interpolazione sui punti "non noti".
 
 Nota bene:
 
-Per tutte le spiegazioni di carattere teorico ed applicativo si rimanda al [materiale didattico](https://github.com/fpirotti/ARPA2024_corsoBase){.external target="_blank"} reso disponibile dal Prof. Pirotti.
+Per tutte le spiegazioni di carattere teorico ed applicativo si rimanda al [materiale didattico](https://github.com/fpirotti/ARPA2024_corsoBase){.external target="_blank"} reso disponibile dal Prof. Pirotti (UniPd).
 
-L'obiettivo del presente esercizio è ripercorrere a futura memoria, nel modo più sintetico possibile, i passaggi di calcolo in R, senza introdurre alcun tipo di valutazione critica e/o ulteriore discussione sia rispetto ai metodi che ai risultati ottenuti.
+L'obiettivo dell'esercizio è ripercorrere a futura memoria e nel modo più sintetico possibile, i vari passaggi di calcolo in R, senza introdurre alcun tipo di valutazione critica e/o ulteriore discussione, sia rispetto ai metodi sia rispetto ai risultati ottenuti.
 
-L'unica variazione rispetto agli scripts originali del Prof. Pirotti è rappresentata dall'applicazione di metodi leggermente differenti (funzioni ed argomenti) per il kriging che conducono comunque a risultati finali del tutto sovrapponibili.
+L'unica variazione rispetto agli scripts originali del Prof. Pirotti (UniPD) è rappresentata dall'applicazione di metodi leggermente differenti per il kriging (funzioni ed argomenti dal pacchetto 'gstat') che portano comunque a risultati finali del tutto sovrapponibili.
 
 # *cfr. file:*<br> what_is_kriging_in_a_nutshell.html
 
-Contiene una brevissima nota (10 min di lettura) che tratta le principali caratteristiche tecniche dell'interpolazione spaziale tramite kriging. 
+Brevissima nota (10 min di lettura) che sintetizza le principali caratteristiche tecniche dell'interpolazione spaziale tramite kriging. 
 
-In particolare, viene evidenziato il significato e l'impiego del "variogramma" per il calcolo dei pesi relativi al sistema lineare di kriging.
+In particolare, viene evidenziato il significato e l'impiego del "variogramma" finalizzato al calcolo dei pesi relativi al sistema lineare di kriging.
 
 
 # *cfr. file:*<br> 00_my_recap_data_cleaning_and_munging.R
@@ -46,37 +46,37 @@ A partire dai dati grezzi:
 - raster DEM RV
 - raster temperatura RV
 
-Applicazione di alcune operazioni preliminari per creare un dataset “pulito” su cui svolgere gli esercizi:
+applicazione di alcune operazioni preliminari per definire un dataset “pulito” su cui svolgere gli esercizi, in particolare:
 
-- importo raster (temperatura, DEM)
-- campiono 1000 punti su raster temperatura
-- estraggo quote (altitudine slm) in corrispondenza dei punti campionati
-- creo dataframe con coordinate (xy), temperatura e quota
+- importazione raster (temperatura, DEM);
+- campionamento di 1000 punti su raster temperatura;
+- estrazione delle quote altimetriche in corrispondenza dei punti campionati;
+- creazione dataframe con coordinate (xy), temperatura e quota.
 
 # *cfr. file:*<br> 01_my_recap_interpolation_deterministic_methods.R
 
 Applicazione dei metodi di interpolazione di tipo deterministico:
 
-- nearest neighbour
-- nearest neighbour with linear interpolation
-- idw: inverse distance weighted power 1
-- idw: inverse distance weighted power 2
+- nearest neighbour;
+- nearest neighbour with linear interpolation;
+- idw: inverse distance weighted power 1;
+- idw: inverse distance weighted power 2;
 
-e verifica finale dell'accuratezza finale di stima.
+e verifica finale dell'accuratezza di stima.
 
 # *cfr. file:*<br> 02_my_recap_interpolation_geostatistics_methods_ok_uk_ked_ck.R
 
 Applicazione dei metodi di interpolazione di tipo geostatistico:
 
-- ordinary kriging
-- universal kriging
-- kriging with external drift
-- co-kriging
+- ordinary kriging;
+- universal kriging;
+- kriging with external drift;
+- co-kriging;
 
-e verifica finale dell'accuratezza finale di stima.
+e verifica finale dell'accuratezza di stima.
 
 
 # Conclusioni
 
-La valutazione critica dei risultati viene lasciata come esercizio individuale di approfondimento.
+La valutazione critica dei risultati e dei metodi di analisi viene lasciata come esercizio individuale di approfondimento.
 
