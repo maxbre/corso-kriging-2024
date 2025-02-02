@@ -18,11 +18,13 @@ L'obiettivo degli appunti è ricapitolare i passaggi fondamentali di calcolo in 
 
 Strategia generale di analisi dei dati:
 
-- creo un "dataset incompleto" (punti) relativi a temperatura e quota altimetrica a partire dal "dataset completo" (raster) della Regione Veneto;
+- creo un "dataset incompleto" di "punti" di misura della temperatura e della quota altimetrica a partire dal "dataset completo" fornito dal "raster" della Regione Veneto;
 
-- utilizzo metodi alternativi di interpolazione, sia di tipo deterministico che geostatistico, per ricreare una stima il più possibile attendibile del "dataset completo";
+- utilizzo metodi alternativi di interpolazione, sia di tipo deterministico che geostatistico, per ricreare una stima il più possibile attendibile del "dataset completo" (raster) a partire dal "dataset incompleto" (punti);
 
-- verifico i risultati di interpolazione sui punti "non noti".
+- verifico i risultati di interpolazione effettuato a partire dai punti "noti" sui punti "non noti".
+
+In altri termini, l'esercizio ripropone la classica situazione operativa in cui a partire da alcune limitate osservazioni sperimentali (punti di campionamento) di variabili ambientali si ha la necessità di riprodurre una stima il più possibile attendibile del "campo continuo" (in termini geografici - ed eventualmente temporali) delle variabili di interesse.
 
 Nota bene:
 
@@ -50,7 +52,7 @@ applicazione di alcune operazioni preliminari per definire un dataset “pulito�
 
 - importazione raster (temperatura, DEM);
 - campionamento di 1000 punti su raster temperatura;
-- estrazione delle quote altimetriche in corrispondenza dei punti campionati;
+- estrazione delle quote altimetriche in corrispondenza dei punti già campionati per la temperatura;
 - creazione dataframe con coordinate (xy), temperatura e quota.
 
 # *cfr. file:*<br> 01_my_recap_interpolation_deterministic_methods.R

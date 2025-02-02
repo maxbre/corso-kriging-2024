@@ -390,7 +390,7 @@ p_dem
 ## compare two variograms
 grid.arrange(p_temp, p_dem, ncol = 2)  # Multiplot
 
-# co-variogram or cross variogram for both variables ----
+## co-variogram or cross variogram for both variables ----
 g_temp_dem <- gstat(NULL,
                     id = "temp",
                     formula = temp ~ 1,
@@ -426,7 +426,7 @@ g_temp_dem
 
 plot(v_cross_temp_dem, model = g_temp_dem$model)
 
-# coKriging prediction at grid locations -----
+## coKriging prediction at grid locations -----
 ck_temp_dem <- predict(g_temp_dem, 
                        # sp_shp_rv     # newdata
                        sp_temp_dem_rv # newdata
@@ -459,9 +459,8 @@ plot(
 df_dt_ck <- as.data.frame(delta_r_temp_dem_ck_rv, xy = TRUE) %>%
   cbind(method = "krig_co_dem")
 
-# closing up ----
+# closing up, bind rows all data frames ----
 
-# bind rows all data frames ----
 df_delta_temp <- bind_rows(df_dt_ok, df_dt_uk, df_dt_ked, df_dt_ck)
 
 # export delta of temp for different kriiging methods

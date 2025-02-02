@@ -19,16 +19,17 @@ r_dem <- rast("data_raw/VenetoDEM.tif")
 # check for different resolution
 res(r_temp) == res(r_dem)
 
-# rasters with different resolution
+# rasters are with different resolution
 # and this can cause a lot of headheaches
 # in the further manipulation of the dataset
+# and that's why of the next quite elaborated manipulation of data
 
 # pivot raster -----
 # trick: use a pivot void raster with the shape of RV
 v_shp_rv <- vect("./data_raw/veneto.gpkg")
 plot(v_shp_rv)
 
-# next code is about modfying the resolution of the raster
+# next code is about modfying the resolution of the tow raster temp and dem
 # by using a pivot model to transfer spatial information (by resample)
 # it's a bit tricky (take some time to ponder!)
 
@@ -42,32 +43,32 @@ r_shp_rv
 # equator is about 40000 km,
 # 1 degree long = 40000/360 ~ 111 km, 0.1 gradi ~ 11 km
 # at latitude of IT a lot less, halve it, roughly!
+# to know what does it mean 0.1 degree in longitude, here in rv (about)
 # library(geosphere)
 # distm(c(12.5, 45.5), c(12.6, 45.5), fun = distHaversine)
 # shortest distance (geodesic, great circle distance) based on WGS84 ellipsoid
 # https://en.wikipedia.org/wiki/Great-circle_distance
 # distGeo(c(12.5, 45.5), c(12.6, 45.5))
 
-# rasterize it
+# rasterize the vector shp rv
+# this is going to be a sort of pivot raster to align all other raster objects
 # transfer values associated with the geometries of vector data to a raster
 r_shp_rv <- rasterize(v_shp_rv, r_shp_rv)
 r_shp_rv <- classify(r_shp_rv, cbind(1, -999))
 names(r_shp_rv) <- "shape_rv"
 plot(r_shp_rv)
-# this is a sort of pivot raster to align all other raster objects
 
 # export as void raster rv in the form of tif (to be eventually used later)
 writeRaster(r_shp_rv, './data_input/r_shp_rv.tif', overwrite = TRUE)
 
-
-# export as void raster rv in teh form of csv
+# export as void raster rv in the form of csv
 write.csv(as.data.frame(r_shp_rv, xy = TRUE),
           './data_input/r_shp_rv.csv',
           row.names = FALSE)
 
 # resampling -------
 # resample the temp object, imported from tif file
-# to get the same spatial resolution
+# to get the same spatial resolution by using the pivot raster shape of rv
 r_temp_rv <- terra::resample(r_temp, r_shp_rv, method = "bilinear")
 plot(r_temp_rv)
 
@@ -81,7 +82,7 @@ plot(r_temp_rv)
 # export raster temp rv (to be later used again)
 writeRaster(r_temp_rv, './data_input/r_temp_rv.tif', overwrite = TRUE)
 
-# resample the temp object, imported from tif file
+# resample the dem object, imported from tif file
 # to get the same spatial resolution
 r_dem_rv <- terra::resample(r_dem, r_shp_rv, method = "bilinear")
 plot(r_dem_rv)
@@ -89,7 +90,7 @@ plot(r_dem_rv)
 # change name to something more meaningful
 names(r_dem_rv) <- "elev_m"
 
-# crop and mask RV raster temp
+# crop and mask RV raster dem
 r_dem_rv <- crop(r_dem_rv, r_shp_rv, mask = TRUE)
 plot(r_dem_rv)
 
@@ -180,7 +181,7 @@ df_temp_dem_rv_s <- df_temp_dem_rv_s[complete.cases(df_temp_dem_rv_s), ]
 write_csv(df_temp_dem_rv_s,
           './data_input/df_temp_dem_rv_sampling.csv')
 
-# export rasters for all rv for temp and dem as csv -------
+# export rasters for rv temp and dem as csv -------
 
 df_temp_rv <- r_temp_rv %>%
   as.data.frame(xy = TRUE)
@@ -206,12 +207,12 @@ i <- which(is.na(df_temp_dem_rv), arr.ind = TRUE)
 # select rows
 r <- i[, 1]
 
-# this is a bit rough, but no time now to clean up too much...
+# this is a bit rough, but no time now to clean up too much things...
 lon <- df_temp_dem_rv[r, 1]
 lat <- df_temp_dem_rv[r, 2]
 
 # so now the big question is:
-#.... but where the heck are located the missing pixels?
+#.... but where the heck are located those missing pixels?
 
 pixel <- data.frame(lon = lon, lat = lat)
 

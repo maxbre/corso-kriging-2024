@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Massimo Bressan, ARPAV UQA">
-<meta name="dcterms.date" content="2024-11-08">
+<meta name="dcterms.date" content="2025-02-02">
 
 <title>Appunti di geostatistica</title>
 <style>
@@ -3070,7 +3070,7 @@ vertical-align: -.125em;
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">November 8, 2024</p>
+      <p class="date">February 2, 2025</p>
     </div>
   </div>
   
@@ -3087,10 +3087,11 @@ vertical-align: -.125em;
 <p>L’obiettivo degli appunti è ricapitolare i passaggi fondamentali di calcolo in R relativi all’esercitazione pratica sui metodi di interpolazione di tipo deterministico e geostatistico, svolti nel corso di formazione ARPAV tenuto dal Prof. Pirotti (UniPD) nel 2024 (per 16 ore complessive).</p>
 <p>Strategia generale di analisi dei dati:</p>
 <ul>
-<li><p>creo un “dataset incompleto” (punti) relativi a temperatura e quota altimetrica a partire dal “dataset completo” (raster) della Regione Veneto;</p></li>
-<li><p>utilizzo metodi alternativi di interpolazione, sia di tipo deterministico che geostatistico, per ricreare una stima il più possibile attendibile del “dataset completo”;</p></li>
-<li><p>verifico i risultati di interpolazione sui punti “non noti”.</p></li>
+<li><p>creo un “dataset incompleto” di “punti” di misura della temperatura e della quota altimetrica a partire dal “dataset completo” fornito dal “raster” della Regione Veneto;</p></li>
+<li><p>utilizzo metodi alternativi di interpolazione, sia di tipo deterministico che geostatistico, per ricreare una stima il più possibile attendibile del “dataset completo” (raster) a partire dal “dataset incompleto” (punti);</p></li>
+<li><p>verifico i risultati di interpolazione effettuato a partire dai punti “noti” sui punti “non noti”.</p></li>
 </ul>
+<p>In altri termini, l’esercizio ripropone la classica situazione operativa in cui a partire da alcune limitate osservazioni sperimentali (punti di campionamento) di variabili ambientali si ha la necessità di riprodurre una stima il più possibile attendibile del “campo continuo” (in termini geografici - ed eventualmente temporali) delle variabili di interesse.</p>
 <p>Nota bene:</p>
 <p>Per tutte le spiegazioni di carattere teorico ed applicativo si rimanda al <a href="https://github.com/fpirotti/ARPA2024_corsoBase" class="external" target="_blank">materiale didattico</a> reso disponibile dal Prof. Pirotti (UniPd).</p>
 <p>L’obiettivo dell’esercizio è ripercorrere a futura memoria e nel modo più sintetico possibile, i vari passaggi di calcolo in R, senza introdurre alcun tipo di valutazione critica e/o ulteriore discussione, sia rispetto ai metodi sia rispetto ai risultati ottenuti.</p>
@@ -3112,7 +3113,7 @@ vertical-align: -.125em;
 <ul>
 <li>importazione raster (temperatura, DEM);</li>
 <li>campionamento di 1000 punti su raster temperatura;</li>
-<li>estrazione delle quote altimetriche in corrispondenza dei punti campionati;</li>
+<li>estrazione delle quote altimetriche in corrispondenza dei punti già campionati per la temperatura;</li>
 <li>creazione dataframe con coordinate (xy), temperatura e quota.</li>
 </ul>
 </section>
