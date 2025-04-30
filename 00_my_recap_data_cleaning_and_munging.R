@@ -39,7 +39,6 @@ plot(v_shp_rv)
 r_shp_rv <- rast(v_shp_rv, res = 0.02) # it is in decimal degrees because of lon,lat
 r_shp_rv
 
-
 # equator is about 40000 km,
 # 1 degree long = 40000/360 ~ 111 km, 0.1 gradi ~ 11 km
 # at latitude of IT a lot less, halve it, roughly!
@@ -154,7 +153,7 @@ df_dem_rv_s <- terra::extract(r_dem_rv,
                               ID = FALSE)
 
 # transform spatial vector of temp to df
-df_temp_rv_s <- as.data.frame(v_temp_rv_s, geom = "XY")
+df_temp_rv_s <- as.data.frame(v_temp_rv_s)
 
 # inner join temp and dem sampling as df
 # this seems a more safer approach because is checking for same exact coordinates
